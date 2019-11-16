@@ -4,7 +4,6 @@ module Framer.App
   ( main
   ) where
 
-import qualified Data.ByteString as BS
 import Data.FSEntries.IO (writeFSEntriesToFS)
 import Data.FSEntries.Types
 import Framer.ChangeLog (changeLogText)

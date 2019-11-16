@@ -32,6 +32,8 @@ dependencies:
 - vector == 0.12.0.3
 - yaml == 0.11.2.0
 
+ghc-options: -Wall -Wcompat
+
 library:
   source-dirs: src
 
