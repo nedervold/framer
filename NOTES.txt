@@ -7,3 +7,14 @@ Need to include as options various testing flavors for tasty-discover.
 
 If I'm building an app, enforce a structure.
 
+Be able to pass in dependencies.
+
+Be able to pass in github dependencies:
+https://github.com/commercialhaskell/stack/blob/master/doc/yaml_configuration.md
+
+I'd love a GUI, but Haskell.  (Java?  Take a JSON structure streamed
+as input if no config file mentioned?)
+
+I don't think I need the yaml library.  I'm just constructing stuff
+and I could do that by hand.
+

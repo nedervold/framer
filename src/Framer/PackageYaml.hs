@@ -8,6 +8,7 @@ module Framer.PackageYaml where
 import Data.ByteString (ByteString)
 import qualified Data.HashMap.Strict as HM
 import Data.Maybe (catMaybes)
+import qualified Data.Set as S
 import Data.String (IsString(..))
 import Data.String.Interpolate (i)
 import Data.Text (Text)
@@ -86,12 +87,24 @@ packageYamlText Config {..} = encode yaml
                 , mkArray ["-threaded", "-rtsopts", "-with-rtsopts=-N"])
               , ( "dependencies"
                 , mkArray
-                    [ mkString [i|#{projectName}|]
-                    , "tasty == 1.2.3"
-                    , "tasty-discover == 4.2.1"
-                    ])
+                    ([ mkString [i|#{projectName}|]
+                     , "tasty == 1.2.3"
+                     , "tasty-discover == 4.2.1"
+                     ] ++
+                     concatMap testTypeLibraries (S.toList tastyTestTypes)))
               ])
         ]
+
+testTypeLibraries :: TestType -> [Value]
+testTypeLibraries Hedgehog =
+  ["hedgehog == 1.0.1", "tasty-hedgehog == 1.0.0.1"]
+testTypeLibraries Hspec = ["hspec == 2.7.1", "tasty-hspec == 1.1.5.1"]
+testTypeLibraries HUnit = ["HUnit == 1.6.0.0", "tasty-hunit == 0.10.0.2"]
+testTypeLibraries QuickCheck =
+  ["QuickCheck == 2.13.2", "tasty-quickcheck == 0.10.1"]
+testTypeLibraries SmallCheck =
+  ["smallcheck == 1.1.5", "tasty-smallcheck == 0.8.1"]
+testTypeLibraries Tasty = []
 
 mkObject :: [(Text, Value)] -> Value
 mkObject = Object . HM.fromList
