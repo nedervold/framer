@@ -12,6 +12,7 @@ import Framer.GitIgnore (gitIgnoreText)
 import Framer.Lib (libText)
 import Framer.License (licenseText)
 import Framer.Main (mainText)
+import Framer.Makefile (makefileText)
 import Framer.PackageYaml (packageYamlText)
 import Framer.ReadMe (readMeText)
 import Framer.Setup (setupText)
@@ -30,6 +31,7 @@ main = do
         mkFSEntries
           [ mkFile ".gitignore" $ gitIgnoreText config
           , mkFile "ChangeLog.md" $ changeLogText config
+          , mkFile "Makefile" $ makefileText config
           , mkFile "package.yaml" $ packageYamlText config
           , mkFile "Setup.hs" $ setupText config
           , mkFile "stack.yaml" $ stackYamlText config
