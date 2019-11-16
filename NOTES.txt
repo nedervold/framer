@@ -1,2 +1,9 @@
 A project to exercise fs-entries to build the framework for a Haskell
 project.
+
+I need to not have the Config value hard-coded.
+
+Need to include as options various testing flavors for tasty-discover.
+
+If I'm building an app, enforce a structure.
+
