@@ -1,1 +1,2 @@
-Notes for framer.
+A project to exercise fs-entries to build the framework for a Haskell
+project.
