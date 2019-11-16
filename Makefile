@@ -7,7 +7,10 @@ run :
 	-rm -rf target-directory
 	stack exec framer-exe -- target-directory
 	find target-directory
-	cd target-directory && stack build && stack exec sample-exe
+	cd target-directory && \
+	    stack build && \
+	    stack exec sample-exe && \
+	    stack test
 
 hindent :
 	find app src test -name '*.hs' -exec $(HINDENT) \{} \;

@@ -9,11 +9,13 @@ import Data.FSEntries.IO (writeFSEntriesToFS)
 import Data.FSEntries.Types
 import Framer.ChangeLog (changeLogText)
 import Framer.Config
+import Framer.GitIgnore (gitIgnoreText)
 import Framer.Lib (libText)
 import Framer.License (licenseText)
 import Framer.Main (mainText)
 import Framer.PackageYaml (packageYamlText)
 import Framer.ReadMe (readMeText)
+import Framer.Setup (setupText)
 import Framer.Spec (specText)
 import Framer.StackYaml (stackYamlText)
 import System.Directory (createDirectory, makeAbsolute)
@@ -27,8 +29,10 @@ main = do
   targetDir' <- makeAbsolute targetDir
   let entries =
         mkFSEntries
-          [ mkFile "ChangeLog.md" $ changeLogText config
+          [ mkFile ".gitignore" $ gitIgnoreText config
+          , mkFile "ChangeLog.md" $ changeLogText config
           , mkFile "package.yaml" $ packageYamlText config
+          , mkFile "Setup.hs" $ setupText config
           , mkFile "stack.yaml" $ stackYamlText config
           , mkFile "LICENSE" $ licenseText config
           , mkFile "README.md" $ readMeText config
