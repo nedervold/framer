@@ -3,7 +3,21 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    cabal-file:
+      size: 2125
+      sha256: 6343d1bc0d2c7de334596a0d83a489369f5a28b94316be802382168c990a48b2
+    name: fs-entries
+    version: 0.1.0.0
+    git: https://github.com/nedervold/fs-entries
+    pantry-tree:
+      size: 1005
+      sha256: c43b8dfe75ae1e20a94188ffca2c60b002979b9a4b32b2e496ccdc7b102042fa
+    commit: 484e963d5a50ae12829723baa0a0220899a3743e
+  original:
+    git: https://github.com/nedervold/fs-entries
+    commit: 484e963d5a50ae12829723baa0a0220899a3743e
 snapshots:
 - completed:
     size: 525663

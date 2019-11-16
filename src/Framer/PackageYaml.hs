@@ -1,10 +1,24 @@
-name:                framer
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE QuasiQuotes #-}
+
+module Framer.PackageYaml where
+
+import Data.ByteString (ByteString)
+import Data.ByteString.UTF8 (fromString)
+import Data.String.Interpolate (i)
+import Framer.Config
+
+-- | TODO Generalize over author name and current year
+packageYamlText :: Config -> ByteString
+packageYamlText Config {..} =
+  fromString
+    [i|name:                #{projectName}
 version:             0.1.0.0
-github:              "githubuser/framer"
+github:              "#{githubName}/#{projectName}"
 license:             BSD3
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2019 Author name here"
+author:              "#{authorName}"
+maintainer:          "#{authorEmail}"
+copyright:           "#{thisYear} #{authorName}"
 
 extra-source-files:
 - README.md
@@ -17,22 +31,16 @@ extra-source-files:
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/githubuser/framer#readme>
+description:         Please see the README on GitHub at <https://github.com/#{githubName}/#{projectName}#readme>
 
 dependencies:
 - base >= 4.7 && < 5
-- bytestring == 0.10.8.2
-- directory == 1.3.3.0
-- filepath == 1.4.2.1
-- fs-entries == 0.1.0.0
-- interpolate == 0.2.0
-- utf8-string == 1.0.1.1
 
 library:
   source-dirs: src
 
 executables:
-  framer-exe:
+  #{projectName}-exe:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
@@ -40,10 +48,10 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - framer
+    - #{projectName}
 
 tests:
-  framer-test:
+  #{projectName}-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
@@ -51,4 +59,6 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - framer
+    - #{projectName}
+
+|]
