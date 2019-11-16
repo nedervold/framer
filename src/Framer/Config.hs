@@ -6,6 +6,7 @@ data Config = Config
   , projectName :: String
   , githubName :: String
   , authorEmail :: String
+  , tastyDiscoverTests :: Bool
   } deriving (Show)
 
 config :: Config
@@ -16,4 +17,5 @@ config =
   , projectName = "sample"
   , githubName = "nedervold"
   , authorEmail = "nedervoldsoftware@gmail.com"
+  , tastyDiscoverTests = True
   }

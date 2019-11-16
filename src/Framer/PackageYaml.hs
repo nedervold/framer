@@ -43,9 +43,14 @@ packageYamlText Config {..} = encode yaml
         , if null mExecutables
             then Nothing
             else Just ("executables", mkObject mExecutables)
-        , fmap ("tests", ) mTests
+        , fmap ("tests", ) $
+          if tastyDiscoverTests
+            then mTastyDiscoverTests
+            else mTests
         ]
+    mLibrary :: Maybe Value
     mLibrary = Just $ mkObject [("source-dirs", String "src")]
+    mExecutables :: [(Text, Value)]
     mExecutables =
       [ ( fromString [i|#{projectName}-exe|]
         , mkObject
@@ -56,6 +61,7 @@ packageYamlText Config {..} = encode yaml
             , ("dependencies", mkArray [mkString [i|#{projectName}|]])
             ])
       ]
+    mTests :: Maybe Value
     mTests =
       Just $
       mkObject
@@ -66,6 +72,24 @@ packageYamlText Config {..} = encode yaml
               , ( "ghc-options"
                 , mkArray ["-threaded", "-rtsopts", "-with-rtsopts=-N"])
               , ("dependencies", mkArray [mkString [i|#{projectName}|]])
+              ])
+        ]
+    mTastyDiscoverTests :: Maybe Value
+    mTastyDiscoverTests =
+      Just $
+      mkObject
+        [ ( fromString [i|#{projectName}-test|]
+          , mkObject
+              [ ("main", "Spec.hs")
+              , ("source-dirs", "test")
+              , ( "ghc-options"
+                , mkArray ["-threaded", "-rtsopts", "-with-rtsopts=-N"])
+              , ( "dependencies"
+                , mkArray
+                    [ mkString [i|#{projectName}|]
+                    , "tasty == 1.2.3"
+                    , "tasty-discover == 4.2.1"
+                    ])
               ])
         ]
 

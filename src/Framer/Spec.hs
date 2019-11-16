@@ -10,7 +10,10 @@ import Framer.Config
 
 specText :: Config -> ByteString
 specText Config {..} =
-  fromString
-    [i|main :: IO ()
+  fromString $
+  if tastyDiscoverTests
+    then [i|{-# OPTIONS_GHC -F -pgmF tasty-discover #-}
+|]
+    else [i|main :: IO ()
 main = putStrLn "Test suite not yet implemented"
 |]
