@@ -1,37 +1,51 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE QuasiQuotes #-}
 
 module Framer.PackageYaml where
 
 import Data.ByteString (ByteString)
-import Data.ByteString.UTF8 (fromString)
+import qualified Data.ByteString as BS
+import qualified Data.ByteString.UTF8 as BS
+import qualified Data.HashMap.Strict as HM
+import Data.String (IsString(..))
 import Data.String.Interpolate (i)
+import Data.Text (Text)
+import qualified Data.Vector as V
+import Data.Yaml
 import Framer.Config
 
 -- | TODO Generalize over author name and current year
 packageYamlText :: Config -> ByteString
-packageYamlText Config {..} =
-  fromString
-    [i|name:                #{projectName}
-version:             0.1.0.0
-github:              "#{githubName}/#{projectName}"
-license:             BSD3
-author:              "#{authorName}"
-maintainer:          "#{authorEmail}"
-copyright:           "#{thisYear} #{authorName}"
-
-extra-source-files:
-- README.md
-- ChangeLog.md
-
+packageYamlText Config {..} = BS.concat [yamlBits, spacer, base]
+  where
+    spacer =
+      "\n\n############################################################\n\n"
+    yamlBits = encode yaml
+    yaml :: Value
+    yaml =
+      Object $
+      HM.fromList
+        [ ("name", String $ fromString projectName)
+        , ("version", String "0.1.0.0")
+        , ("github", String $ fromString [i|#{githubName}/#{projectName}|])
+        , ("license", String "BSD3")
+        , ("copyright", String $ fromString [i|#{thisYear} #{authorName}|])
+        , ("author", String $ fromString authorName)
+        , ("maintainer", String $ fromString authorEmail)
+        , ( "extra-source-files"
+          , Array $ V.fromList [String "README.md", String "ChangeLog.md"])
+        , ( "description"
+          , String $
+            fromString
+              [i|Please see the README on GitHub at <https://github.com/#{githubName}/#{projectName}#readme>|])
+        ]
+    base =
+      BS.fromString
+        [i|
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
 # category:            Web
-
-# To avoid duplicated efforts in documentation and dealing with the
-# complications of embedding Haddock markup inside cabal files, it is
-# common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/#{githubName}/#{projectName}#readme>
 
 dependencies:
 - base >= 4.7 && < 5
