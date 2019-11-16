@@ -10,6 +10,7 @@ import qualified Data.HashMap.Strict as HM
 import Data.Maybe (catMaybes)
 import Data.String (IsString(..))
 import Data.String.Interpolate (i)
+import Data.Text (Text)
 import qualified Data.Vector as V
 import Data.Yaml
 import Framer.Config
@@ -20,65 +21,59 @@ packageYamlText Config {..} = encode yaml
   where
     yaml :: Value
     yaml =
-      Object $
-      HM.fromList $
+      mkObject $
       catMaybes
-        [ Just ("author", String $ fromString authorName)
-        , Just
-            ( "copyright"
-            , String $ fromString [i|#{thisYear} #{authorName}|])
-        , Just
-            ( "dependencies"
-            , Array $ V.fromList [String "base >= 4.7 && < 5"])
+        [ Just ("author", mkString authorName)
+        , Just ("copyright", mkString [i|#{thisYear} #{authorName}|])
+        , Just ("dependencies", mkArray [mkString "base >= 4.7 && < 5"])
         , Just
             ( "description"
-            , String $
-              fromString
+            , mkString
                 [i|Please see the README on GitHub at <https://github.com/#{githubName}/#{projectName}#readme>|])
         , Just
             ( "extra-source-files"
-            , Array $ V.fromList [String "README.md", String "ChangeLog.md"])
-        , Just ("ghc-options", String "-Wall -Wcompat")
-        , Just
-            ( "github"
-            , String $ fromString [i|#{githubName}/#{projectName}|])
-        , Just ("license", String "BSD3")
-        , Just ("maintainer", String $ fromString authorEmail)
-        , Just ("name", String $ fromString projectName)
-        , Just ("version", String "0.1.0.0")
+            , mkArray [mkString "README.md", mkString "ChangeLog.md"])
+        , Just ("ghc-options", mkString "-Wall -Wcompat")
+        , Just ("github", mkString [i|#{githubName}/#{projectName}|])
+        , Just ("license", mkString "BSD3")
+        , Just ("maintainer", mkString authorEmail)
+        , Just ("name", mkString projectName)
+        , Just ("version", mkString "0.1.0.0")
         , fmap ("library", ) mLibrary
         , if null mExecutables
             then Nothing
-            else Just $ ("executables", Object $ HM.fromList $ mExecutables)
+            else Just ("executables", mkObject mExecutables)
         , fmap ("tests", ) mTests
         ]
-    mLibrary = Just $ Object $ HM.fromList [("source-dirs", String "src")]
+    mLibrary = Just $ mkObject [("source-dirs", String "src")]
     mExecutables =
       [ ( fromString [i|#{projectName}-exe|]
-        , Object $
-          HM.fromList
+        , mkObject
             [ ("main", "Main.hs")
             , ("source-dirs", "app")
             , ( "ghc-options"
-              , Array $
-                V.fromList ["-threaded", "-rtsopts", "-with-rtsopts=-N"])
-            , ( "dependencies"
-              , Array $ V.fromList [fromString [i|#{projectName}|]])
+              , mkArray ["-threaded", "-rtsopts", "-with-rtsopts=-N"])
+            , ("dependencies", mkArray [mkString [i|#{projectName}|]])
             ])
       ]
     mTests =
       Just $
-      Object $
-      HM.fromList
+      mkObject
         [ ( fromString [i|#{projectName}-test|]
-          , Object $
-            HM.fromList
+          , mkObject
               [ ("main", "Spec.hs")
               , ("source-dirs", "test")
               , ( "ghc-options"
-                , Array $
-                  V.fromList ["-threaded", "-rtsopts", "-with-rtsopts=-N"])
-              , ( "dependencies"
-                , Array $ V.fromList [fromString [i|#{projectName}|]])
+                , mkArray ["-threaded", "-rtsopts", "-with-rtsopts=-N"])
+              , ("dependencies", mkArray [mkString [i|#{projectName}|]])
               ])
         ]
+
+mkObject :: [(Text, Value)] -> Value
+mkObject = Object . HM.fromList
+
+mkArray :: [Value] -> Value
+mkArray = Array . V.fromList
+
+mkString :: String -> Value
+mkString = String . fromString
