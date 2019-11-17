@@ -14,3 +14,5 @@ readMeText Config {..} =
   fromString
     [i|# #{projectName}
 |]
+  where
+    ProjectInfo {..} = projectInfo

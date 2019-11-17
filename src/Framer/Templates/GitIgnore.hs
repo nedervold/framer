@@ -19,3 +19,5 @@ gitIgnoreText Config {..} =
 *~
 \#*
 |]
+  where
+    ProjectInfo {..} = projectInfo

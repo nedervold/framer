@@ -15,3 +15,5 @@ changeLogText Config {..} =
 
 ## Unreleased changes
 |]
+  where
+    ProjectInfo {..} = projectInfo

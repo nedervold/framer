@@ -33,3 +33,5 @@ makefileText Config {..} =
     , "\tfind . -name '*~' -delete"
     , "\tfind . -name '#*' -delete"
     ]
+  where
+    ProjectInfo {..} = projectInfo

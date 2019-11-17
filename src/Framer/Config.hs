@@ -22,19 +22,27 @@ data App = App
   , isFancy :: Bool
   } deriving (Show)
 
-data Config = Config
-  { thisYear :: String
-  , authorName :: String
-  , projectName :: String
+data AuthorInfo = AuthorInfo
+  { authorName :: String
   , githubName :: String
   , authorEmail :: String
+  } deriving (Show)
+
+data ProjectInfo = ProjectInfo
+  { projectName :: String
+  , apps :: [App]
   , tastyDiscoverTests :: Bool
   , tastyTestTypes :: S.Set TestType
-  , apps :: [App]
+  } deriving (Show)
+
+data Config = Config
+  { thisYear :: String
+  , authorInfo :: AuthorInfo
+  , projectInfo :: ProjectInfo
   } deriving (Show)
 
 needsFancy :: Config -> Bool
-needsFancy Config {..} = any isFancy apps
+needsFancy Config {..} = any isFancy $ apps projectInfo
 
 getYearAsString :: IO String
 getYearAsString = do
@@ -50,11 +58,18 @@ getConfig = do
   return
     Config
     { thisYear = y
-    , authorName = "Eric Nedervold"
-    , projectName = "sample"
-    , githubName = "nedervold"
-    , authorEmail = "nedervoldsoftware@gmail.com"
-    , tastyDiscoverTests = True
-    , tastyTestTypes = S.singleton Hedgehog
-    , apps = [App "sample-exe" "Sample" True, App "namuna" "Namuna" False]
+    , authorInfo =
+        AuthorInfo
+        { authorName = "Eric Nedervold"
+        , githubName = "nedervold"
+        , authorEmail = "nedervoldsoftware@gmail.com"
+        }
+    , projectInfo =
+        ProjectInfo
+        { projectName = "sample"
+        , apps =
+            [App "sample-exe" "Sample" True, App "namuna" "Namuna" False]
+        , tastyDiscoverTests = True
+        , tastyTestTypes = S.singleton Hedgehog
+        }
     }

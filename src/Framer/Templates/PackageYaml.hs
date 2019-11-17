@@ -19,6 +19,8 @@ import Framer.Config
 packageYamlText :: Config -> ByteString
 packageYamlText config@Config {..} = encode yaml
   where
+    AuthorInfo {..} = authorInfo
+    ProjectInfo {..} = projectInfo
     yaml :: Value
     yaml =
       mkObject $

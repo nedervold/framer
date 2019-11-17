@@ -47,7 +47,8 @@ main = do
           , mkFile "LICENSE" $ licenseText hcConfig
           , mkFile "README.md" $ readMeText hcConfig
           ]
-  let appEntries = concatEntries $ map mkAppEntries $ apps hcConfig
+  let appEntries =
+        concatEntries $ map mkAppEntries $ apps $ projectInfo hcConfig
   let testEntries =
         mkFSEntries [mkDir "test" () [mkFile "Spec.hs" $ specText hcConfig]]
   writeFSEntriesToFS targetDir' $

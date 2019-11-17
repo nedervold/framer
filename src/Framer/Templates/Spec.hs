@@ -17,3 +17,5 @@ specText Config {..} =
     else [i|main :: IO ()
 main = putStrLn "Test suite not yet implemented"
 |]
+  where
+    ProjectInfo {..} = projectInfo
