@@ -46,7 +46,7 @@ packageYamlText config@Config {..} = encode yaml
             then Nothing
             else Just ("executables", mkObject mExecutables)
         , fmap ("tests", ) $
-          if tastyDiscoverTests
+          if tastyDiscoverTests config
             then mTastyDiscoverTests
             else mTests
         ]

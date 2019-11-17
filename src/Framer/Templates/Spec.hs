@@ -9,9 +9,9 @@ import Data.String.Interpolate (i)
 import Framer.Config
 
 specText :: Config -> ByteString
-specText Config {..} =
+specText config@Config {..} =
   fromString $
-  if tastyDiscoverTests
+  if tastyDiscoverTests config
     then [i|{-# OPTIONS_GHC -F -pgmF tasty-discover #-}
 |]
     else [i|main :: IO ()

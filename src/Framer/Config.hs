@@ -31,7 +31,6 @@ data AuthorInfo = AuthorInfo
 data ProjectInfo = ProjectInfo
   { projectName :: String
   , apps :: [App]
-  , tastyDiscoverTests :: Bool
   , tastyTestTypes :: S.Set TestType
   } deriving (Show)
 
@@ -43,6 +42,9 @@ data Config = Config
 
 needsFancy :: Config -> Bool
 needsFancy Config {..} = any isFancy $ apps projectInfo
+
+tastyDiscoverTests :: Config -> Bool
+tastyDiscoverTests Config {..} = not $ S.null $ tastyTestTypes projectInfo
 
 getYearAsString :: IO String
 getYearAsString = do
@@ -69,7 +71,6 @@ getConfig = do
         { projectName = "sample"
         , apps =
             [App "sample-exe" "Sample" True, App "namuna" "Namuna" False]
-        , tastyDiscoverTests = True
         , tastyTestTypes = S.singleton Hedgehog
         }
     }
