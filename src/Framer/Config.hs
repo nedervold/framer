@@ -11,6 +11,11 @@ data TestType
   | Tasty
   deriving (Bounded, Enum, Eq, Ord, Show)
 
+data App = App
+  { appName :: String
+  , appModuleName :: String
+  } deriving (Show)
+
 data Config = Config
   { authorName :: String
   , thisYear :: String
@@ -19,10 +24,12 @@ data Config = Config
   , authorEmail :: String
   , tastyDiscoverTests :: Bool
   , tastyTestTypes :: S.Set TestType
+  , apps :: [App]
   } deriving (Show)
 
-config :: Config
-config =
+-- | Hard-coded config
+hcConfig :: Config
+hcConfig =
   Config
   { authorName = "Eric Nedervold"
   , thisYear = "2019"
@@ -31,4 +38,5 @@ config =
   , authorEmail = "nedervoldsoftware@gmail.com"
   , tastyDiscoverTests = True
   , tastyTestTypes = S.singleton Hedgehog
+  , apps = [App "sample-exe" "Sample", App "namuna" "Namuna"]
   }

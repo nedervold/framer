@@ -52,16 +52,7 @@ packageYamlText Config {..} = encode yaml
     mLibrary :: Maybe Value
     mLibrary = Just $ mkObject [("source-dirs", String "src")]
     mExecutables :: [(Text, Value)]
-    mExecutables =
-      [ ( fromString [i|#{projectName}-exe|]
-        , mkObject
-            [ ("main", "Main.hs")
-            , ("source-dirs", "app")
-            , ( "ghc-options"
-              , mkArray ["-threaded", "-rtsopts", "-with-rtsopts=-N"])
-            , ("dependencies", mkArray [mkString [i|#{projectName}|]])
-            ])
-      ]
+    mExecutables = map (mkApp projectName) apps
     mTests :: Maybe Value
     mTests =
       Just $
@@ -70,8 +61,7 @@ packageYamlText Config {..} = encode yaml
           , mkObject
               [ ("main", "Spec.hs")
               , ("source-dirs", "test")
-              , ( "ghc-options"
-                , mkArray ["-threaded", "-rtsopts", "-with-rtsopts=-N"])
+              , ("ghc-options", mkArray threadingFlags)
               , ("dependencies", mkArray [mkString [i|#{projectName}|]])
               ])
         ]
@@ -83,8 +73,7 @@ packageYamlText Config {..} = encode yaml
           , mkObject
               [ ("main", "Spec.hs")
               , ("source-dirs", "test")
-              , ( "ghc-options"
-                , mkArray ["-threaded", "-rtsopts", "-with-rtsopts=-N"])
+              , ("ghc-options", mkArray threadingFlags)
               , ( "dependencies"
                 , mkArray
                     ([ mkString [i|#{projectName}|]
@@ -95,6 +84,20 @@ packageYamlText Config {..} = encode yaml
               ])
         ]
 
+mkApp :: String -> App -> (Text, Value)
+mkApp projectName App {..} =
+  ( fromString appName
+  , mkObject
+      [ ("main", "Main.hs")
+      , ("source-dirs", fromString [i|app/#{appName}|])
+      , ("ghc-options", mkArray threadingFlags)
+      , ("dependencies", mkArray [mkString [i|#{projectName}|]])
+      ])
+
+threadingFlags :: [Value]
+threadingFlags = ["-threaded", "-rtsopts", "-with-rtsopts=-N"]
+
+------------------------------------------------------------
 testTypeLibraries :: TestType -> [Value]
 testTypeLibraries Hedgehog =
   ["hedgehog == 1.0.1", "tasty-hedgehog == 1.0.0.1"]
@@ -106,6 +109,7 @@ testTypeLibraries SmallCheck =
   ["smallcheck == 1.1.5", "tasty-smallcheck == 0.8.1"]
 testTypeLibraries Tasty = []
 
+------------------------------------------------------------
 mkObject :: [(Text, Value)] -> Value
 mkObject = Object . HM.fromList
 

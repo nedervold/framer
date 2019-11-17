@@ -14,5 +14,5 @@ I'd love a GUI, but Haskell.  (Java?  Take a JSON structure streamed
 as input if no config file mentioned?)
 
 I don't think I need the yaml library.  I'm just constructing stuff
-and I could do that by hand.
-
+and I could do that by hand.  But if I do, do I want the lens-aeson
+library?
