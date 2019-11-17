@@ -16,9 +16,8 @@ import qualified Data.Vector as V
 import Data.Yaml
 import Framer.Config
 
--- | TODO Generalize over author name and current year
 packageYamlText :: Config -> ByteString
-packageYamlText Config {..} = encode yaml
+packageYamlText config@Config {..} = encode yaml
   where
     yaml :: Value
     yaml =
@@ -26,7 +25,7 @@ packageYamlText Config {..} = encode yaml
       catMaybes
         [ Just ("author", mkString authorName)
         , Just ("copyright", mkString [i|#{thisYear} #{authorName}|])
-        , Just ("dependencies", mkArray $ allLibraries hcConfig)
+        , Just ("dependencies", mkArray $ allLibraries config)
         , Just
             ( "description"
             , mkString

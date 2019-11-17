@@ -3,6 +3,9 @@
 module Framer.Config where
 
 import qualified Data.Set as S
+import Data.Time.Calendar (toGregorian)
+import Data.Time.LocalTime
+       (LocalTime(..), ZonedTime(..), getZonedTime)
 
 data TestType
   = Hedgehog
@@ -20,8 +23,8 @@ data App = App
   } deriving (Show)
 
 data Config = Config
-  { authorName :: String
-  , thisYear :: String
+  { thisYear :: String
+  , authorName :: String
   , projectName :: String
   , githubName :: String
   , authorEmail :: String
@@ -33,16 +36,25 @@ data Config = Config
 needsFancy :: Config -> Bool
 needsFancy Config {..} = any isFancy apps
 
--- | Hard-coded config
-hcConfig :: Config
-hcConfig =
-  Config
-  { authorName = "Eric Nedervold"
-  , thisYear = "2019"
-  , projectName = "sample"
-  , githubName = "nedervold"
-  , authorEmail = "nedervoldsoftware@gmail.com"
-  , tastyDiscoverTests = True
-  , tastyTestTypes = S.singleton Hedgehog
-  , apps = [App "sample-exe" "Sample" True, App "namuna" "Namuna" False]
-  }
+getYearAsString :: IO String
+getYearAsString = do
+  zonedTime <- getZonedTime
+  let localTime = zonedTimeToLocalTime zonedTime
+  let d = localDay localTime
+  let (y, _m, _d) = toGregorian d
+  return $ show y
+
+getConfig :: IO Config
+getConfig = do
+  y <- getYearAsString
+  return
+    Config
+    { thisYear = y
+    , authorName = "Eric Nedervold"
+    , projectName = "sample"
+    , githubName = "nedervold"
+    , authorEmail = "nedervoldsoftware@gmail.com"
+    , tastyDiscoverTests = True
+    , tastyTestTypes = S.singleton Hedgehog
+    , apps = [App "sample-exe" "Sample" True, App "namuna" "Namuna" False]
+    }

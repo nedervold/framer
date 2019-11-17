@@ -35,6 +35,7 @@ main = do
   targetDir' <- makeAbsolute targetDir
   exists <- doesDirectoryExist targetDir'
   unless exists $ createDirectory targetDir'
+  hcConfig <- getConfig
   let projectEntries =
         mkFSEntries
           [ mkFile ".gitignore" $ gitIgnoreText hcConfig
