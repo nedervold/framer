@@ -6,11 +6,13 @@ module Framer.App
   ( main
   ) where
 
-import Control.Monad (unless)
+import Control.Monad.Identity
 import Data.ByteString (ByteString)
-import Data.ByteString.UTF8 (fromString)
 import Data.FSEntries.IO (writeFSEntriesToFS)
 import Data.FSEntries.Types
+import Data.FSEntries.Zip (zipFSEntriesWithA)
+import Data.List (foldl')
+import Data.String (IsString(..))
 import Data.String.Interpolate (i)
 import Framer.ChangeLog (changeLogText)
 import Framer.Config
@@ -25,14 +27,15 @@ import Framer.StackYaml (stackYamlText)
 import System.Directory
        (createDirectory, doesDirectoryExist, makeAbsolute)
 import System.Environment (getArgs)
-import Text.Printf (printf)
 
 main :: IO ()
 main = do
   [targetDir] <- getArgs
   putStrLn "Hello, from Framer!"
   targetDir' <- makeAbsolute targetDir
-  let entries =
+  exists <- doesDirectoryExist targetDir'
+  unless exists $ createDirectory targetDir'
+  let projectEntries =
         mkFSEntries
           [ mkFile ".gitignore" $ gitIgnoreText hcConfig
           , mkFile "ChangeLog.md" $ changeLogText hcConfig
@@ -42,21 +45,53 @@ main = do
           , mkFile "stack.yaml" $ stackYamlText hcConfig
           , mkFile "LICENSE" $ licenseText hcConfig
           , mkFile "README.md" $ readMeText hcConfig
-          , ("app", Dir () $ mkMains hcConfig)
-          , ("src", Dir () $ mkSrc hcConfig)
-          , mkDir "test" () [mkFile "Spec.hs" $ specText hcConfig]
           ]
-  exists <- doesDirectoryExist targetDir'
-  unless exists $ createDirectory targetDir'
-  writeFSEntriesToFS targetDir' entries
+  let appEntries = concatEntries $ map mkAppEntries $ apps hcConfig
+  let testEntries =
+        mkFSEntries [mkDir "test" () [mkFile "Spec.hs" $ specText hcConfig]]
+  writeFSEntriesToFS targetDir' $
+    concatEntries [projectEntries, appEntries, testEntries]
 
-mkMains :: Config -> FSEntries () ByteString
-mkMains Config {..} = mkFSEntries $ map mkMainDir apps
+concatEntries :: [FSEntries () ByteString] -> FSEntries () ByteString
+concatEntries = foldl' appendEntries (mkFSEntries [])
   where
-    mkMainDir app@App {..} =
-      mkDir appName () [mkFile "Main.hs" $ mkMainSrc app]
-    mkMainSrc :: App -> ByteString
-    mkMainSrc App {..} =
+    appendEntries
+      :: FSEntries () ByteString
+      -> FSEntries () ByteString
+      -> FSEntries () ByteString
+    appendEntries lhs rhs = runIdentity $ zipFSEntriesWithA merge lhs rhs
+        -- | Given matching entries, the right one prevails.
+      where
+        merge
+          :: Maybe (FSEntry () ByteString)
+          -> Maybe (FSEntry () ByteString)
+          -> Identity (Maybe (FSEntry () ByteString))
+        merge Nothing mRhs = pure mRhs
+        merge mLhs Nothing = pure mLhs
+        merge (Just (Dir () entries)) (Just (Dir () entries')) =
+          pure . Dir () <$> zipFSEntriesWithA merge entries entries'
+        merge (Just (File _)) f@(Just (File _)) = pure f
+        merge (Just (Dir _ _)) (Just (File _)) = error "dir/file conflict"
+        merge (Just (File _)) (Just (Dir _ _)) = error "file/dir conflict"
+
+mkAppEntries :: App -> FSEntries () ByteString
+mkAppEntries App {..} =
+  mkFSEntries
+    [ mkDir "app" () [mkDir appName () [mkFile "Main.hs" mainSrc]]
+    , mkDir
+        "src"
+        ()
+        [mkDir (fromString appModuleName) () [mkFile "App.hs" appSrc]]
+    ]
+  where
+    appSrc =
+      fromString
+        [i|module #{appModuleName}.App(main) where
+
+main :: IO ()
+main = putStrLn "Hello, from #{appName}!"
+|]
+    mainSrc =
       fromString
         [i|module Main(main) where
 
@@ -64,18 +99,4 @@ import qualified #{appModuleName}.App
 
 main :: IO ()
 main = #{appModuleName}.App.main
-|]
-
-mkSrc :: Config -> FSEntries () ByteString
-mkSrc Config {..} = mkFSEntries $ map mkAppDir apps
-  where
-    mkAppDir app@App {..} =
-      mkDir (printf "%s" appModuleName) () [mkFile "App.hs" $ mkAppSrc app]
-    mkAppSrc :: App -> ByteString
-    mkAppSrc App {..} =
-      fromString
-        [i|module #{appModuleName}.App(main) where
-
-main :: IO ()
-main = putStrLn "Hello, from #{appName}!"
 |]
