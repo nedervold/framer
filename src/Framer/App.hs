@@ -81,7 +81,15 @@ mkAppEntries App {..} =
     , mkDir
         "src"
         ()
-        [mkDir (fromString appModuleName) () [mkFile "App.hs" appSrc]]
+        [ mkDir
+            (fromString appModuleName)
+            ()
+            [ mkFile "App.hs" $
+              if isFancy
+                then fancyAppSrc
+                else appSrc
+            ]
+        ]
     ]
   where
     appSrc =
@@ -90,6 +98,50 @@ mkAppEntries App {..} =
 
 main :: IO ()
 main = putStrLn "Hello, from #{appName}!"
+|]
+    fancyAppSrc =
+      fromString
+        [i|{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+
+module #{appModuleName}.App(main) where
+
+import Options.Applicative
+import RIO
+import RIO.ByteString.Lazy
+
+data Config = Config
+    deriving (Show)
+
+configParser :: ParserInfo Config
+configParser = info (helper <*> versionInfo <*> programConfig)
+                    (fullDesc
+                    <> progDesc "<here goes a description of the program>"
+                    <> header "<here goes a header for the program>")
+    where
+    programConfig :: Parser Config
+    programConfig = pure Config
+
+    versionInfo :: Parser (c -> c)
+    versionInfo = infoOption "0.1.0.0" (short 'v' <> long "version" <> help "Show version")
+
+------------------------------------------------------------
+data Env = Env { configuration :: Config }
+    deriving (Show)
+
+mkEnv :: Config -> Env
+mkEnv = Env
+
+------------------------------------------------------------
+main :: IO ()
+main = do
+    config <- execParser configParser
+    let env = mkEnv config
+    runRIO env rioMain
+
+------------------------------------------------------------
+rioMain :: RIO Env ()
+rioMain = putStrLn "Salutations from #{appName}!"
 |]
     mainSrc =
       fromString

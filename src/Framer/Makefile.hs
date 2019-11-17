@@ -8,7 +8,8 @@ import Data.ByteString.UTF8 (fromString)
 import Data.String.Interpolate (i)
 import Framer.Config
 
--- | TODO Generalize over author name and current year
+-- | TODO Tabs and backslashes get messed up, either on production or,
+-- more likely, when running hindent.
 makefileText :: Config -> ByteString
 makefileText Config {..} =
   fromString

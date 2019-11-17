@@ -1,3 +1,5 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module Framer.Config where
 
 import qualified Data.Set as S
@@ -14,6 +16,7 @@ data TestType
 data App = App
   { appName :: String
   , appModuleName :: String
+  , isFancy :: Bool
   } deriving (Show)
 
 data Config = Config
@@ -27,6 +30,9 @@ data Config = Config
   , apps :: [App]
   } deriving (Show)
 
+needsFancy :: Config -> Bool
+needsFancy Config {..} = any isFancy apps
+
 -- | Hard-coded config
 hcConfig :: Config
 hcConfig =
@@ -38,5 +44,5 @@ hcConfig =
   , authorEmail = "nedervoldsoftware@gmail.com"
   , tastyDiscoverTests = True
   , tastyTestTypes = S.singleton Hedgehog
-  , apps = [App "sample-exe" "Sample", App "namuna" "Namuna"]
+  , apps = [App "sample-exe" "Sample" True, App "namuna" "Namuna" False]
   }

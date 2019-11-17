@@ -26,7 +26,7 @@ packageYamlText Config {..} = encode yaml
       catMaybes
         [ Just ("author", mkString authorName)
         , Just ("copyright", mkString [i|#{thisYear} #{authorName}|])
-        , Just ("dependencies", mkArray [mkString "base >= 4.7 && < 5"])
+        , Just ("dependencies", mkArray $ allLibraries hcConfig)
         , Just
             ( "description"
             , mkString
@@ -108,6 +108,18 @@ testTypeLibraries QuickCheck =
 testTypeLibraries SmallCheck =
   ["smallcheck == 1.1.5", "tasty-smallcheck == 0.8.1"]
 testTypeLibraries Tasty = []
+
+------------------------------------------------------------
+allLibraries :: Config -> [Value]
+allLibraries config =
+  base :
+  if needsFancy config
+    then [ mkString "optparse-applicative == 0.14.3.0"
+         , mkString "rio == 0.1.12.0"
+         ]
+    else []
+  where
+    base = mkString "base >= 4.7 && < 5"
 
 ------------------------------------------------------------
 mkObject :: [(Text, Value)] -> Value
