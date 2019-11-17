@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Framer.Config where
 
@@ -8,6 +9,11 @@ import Data.Time.Calendar (toGregorian)
 import Data.Time.LocalTime
        (LocalTime(..), ZonedTime(..), getZonedTime)
 import Data.Yaml
+       (FromJSON(..), ToJSON(..), (.=), (.:), decodeFileEither, object,
+        prettyPrintParseException, withObject)
+import System.Directory
+       (XdgDirectory(..), doesFileExist, getXdgDirectory)
+import System.FilePath ((</>))
 
 data TestType
   = Hedgehog
@@ -28,23 +34,44 @@ data App = App
 ------------------------------------------------------------
 data AuthorInfo = AuthorInfo
   { authorName :: String
-  , githubName :: String
   , authorEmail :: String
+  , githubName :: String
   } deriving (Eq, Show)
 
 instance FromJSON AuthorInfo where
   parseJSON =
     withObject "AuthorInfo" $ \o ->
-      AuthorInfo <$> o .: "authorName" <*> o .: "githubName" <*>
-      o .: "authorEmail"
+      AuthorInfo <$> o .: "authorName" <*> o .: "authorEmail" <*>
+      o .: "githubName"
 
 instance ToJSON AuthorInfo where
   toJSON AuthorInfo {..} =
     object
       [ "authorName" .= authorName
-      , "githubName" .= githubName
       , "authorEmail" .= authorEmail
+      , "githubName" .= githubName
       ]
+
+defaultAuthorInfo :: AuthorInfo
+defaultAuthorInfo =
+  AuthorInfo
+  { authorName = "Joe Author"
+  , githubName = "jauthor"
+  , authorEmail = "jauthor@example.com"
+  }
+
+getAuthorInfo :: IO AuthorInfo
+getAuthorInfo = do
+  dir <- getXdgDirectory XdgConfig "framer"
+  let configFilePath :: FilePath = dir </> "authorInfo.yaml"
+  exists <- doesFileExist configFilePath
+  if exists
+    then do
+      res <- decodeFileEither configFilePath
+      case res of
+        Right ai -> return ai
+        Left exc -> error $ prettyPrintParseException exc
+    else return defaultAuthorInfo
 
 ------------------------------------------------------------
 data ProjectInfo = ProjectInfo
@@ -76,15 +103,11 @@ getYearAsString = do
 getConfig :: IO Config
 getConfig = do
   y <- getYearAsString
+  ai <- getAuthorInfo
   return
     Config
     { thisYear = y
-    , authorInfo =
-        AuthorInfo
-        { authorName = "Eric Nedervold"
-        , githubName = "nedervold"
-        , authorEmail = "nedervoldsoftware@gmail.com"
-        }
+    , authorInfo = ai
     , projectInfo =
         ProjectInfo
         { projectName = "sample"
