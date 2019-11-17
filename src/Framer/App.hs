@@ -115,10 +115,12 @@ data Config = Config
 
 configParser :: ParserInfo Config
 configParser = info (helper <*> versionInfo <*> programConfig)
-                    (fullDesc
-                    <> progDesc "<here goes a description of the program>"
-                    <> header "<here goes a header for the program>")
+                    (fullDesc <> progDesc progDescStr <> header headerStr)
     where
+    progDescStr :: String
+    progDescStr = "<here goes a description of #{appName}>"
+    headerStr :: String
+    headerStr = "<here goes a header for #{appName}>"
     programConfig :: Parser Config
     programConfig = pure Config
 
