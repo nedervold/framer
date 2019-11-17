@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Framer.Config where
@@ -6,6 +7,7 @@ import qualified Data.Set as S
 import Data.Time.Calendar (toGregorian)
 import Data.Time.LocalTime
        (LocalTime(..), ZonedTime(..), getZonedTime)
+import Data.Yaml
 
 data TestType
   = Hedgehog
@@ -16,18 +18,35 @@ data TestType
   | Tasty
   deriving (Bounded, Enum, Eq, Ord, Show)
 
+------------------------------------------------------------
 data App = App
   { appName :: String
   , appModuleName :: String
   , isFancy :: Bool
   } deriving (Show)
 
+------------------------------------------------------------
 data AuthorInfo = AuthorInfo
   { authorName :: String
   , githubName :: String
   , authorEmail :: String
-  } deriving (Show)
+  } deriving (Eq, Show)
 
+instance FromJSON AuthorInfo where
+  parseJSON =
+    withObject "AuthorInfo" $ \o ->
+      AuthorInfo <$> o .: "authorName" <*> o .: "githubName" <*>
+      o .: "authorEmail"
+
+instance ToJSON AuthorInfo where
+  toJSON AuthorInfo {..} =
+    object
+      [ "authorName" .= authorName
+      , "githubName" .= githubName
+      , "authorEmail" .= authorEmail
+      ]
+
+------------------------------------------------------------
 data ProjectInfo = ProjectInfo
   { projectName :: String
   , apps :: [App]
