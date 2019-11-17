@@ -1,19 +1,23 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 
 module Framer.Config where
 
+import qualified Data.Map as M
 import qualified Data.Set as S
+import Data.String (IsString(..))
+import Data.Text (Text)
 import Data.Time.Calendar (toGregorian)
 import Data.Time.LocalTime
        (LocalTime(..), ZonedTime(..), getZonedTime)
 import Data.Yaml
-       (FromJSON(..), ToJSON(..), (.=), (.:), decodeFileEither, object,
-        prettyPrintParseException, withObject)
+       (FromJSON(..), Parser, ToJSON(..), Value(..), (.=), (.:),
+        decodeFileEither, object, prettyPrintParseException, withObject,
+        withText)
 import System.Directory
        (XdgDirectory(..), doesFileExist, getXdgDirectory)
 import System.FilePath ((</>))
+import Text.Printf (printf)
 
 data TestType
   = Hedgehog
@@ -24,12 +28,47 @@ data TestType
   | Tasty
   deriving (Bounded, Enum, Eq, Ord, Show)
 
+allTestTypes :: [TestType]
+allTestTypes = [minBound .. maxBound]
+
+instance FromJSON TestType where
+  parseJSON = withText "TestType" f
+    where
+      f :: Text -> Parser TestType
+      f txt =
+        case M.lookup txt m of
+          Just tt -> pure tt
+          Nothing ->
+            fail $
+            printf
+              "Expected one of %s; got %s."
+              (show $ map show allTestTypes)
+              (show txt)
+      m :: M.Map Text TestType
+      m = M.fromList [(fromString $ show tt, tt) | tt <- allTestTypes]
+
+instance ToJSON TestType where
+  toJSON tt = String $ fromString $ show tt
+
 ------------------------------------------------------------
 data App = App
   { appName :: String
   , appModuleName :: String
   , isFancy :: Bool
-  } deriving (Show)
+  } deriving (Eq, Show)
+
+instance FromJSON App where
+  parseJSON =
+    withObject "App" $ \o ->
+      App <$> o .: "appName" <*> o .: "appModuleName" <*> o .: "isFancy"
+
+instance ToJSON App where
+  toJSON App {..} =
+    object
+      [ "appName" .= appName
+      , "appModuleName" .= appModuleName
+      , "isFancy" .= isFancy
+      ]
 
 ------------------------------------------------------------
 data AuthorInfo = AuthorInfo
@@ -63,7 +102,7 @@ defaultAuthorInfo =
 getAuthorInfo :: IO AuthorInfo
 getAuthorInfo = do
   dir <- getXdgDirectory XdgConfig "framer"
-  let configFilePath :: FilePath = dir </> "authorInfo.yaml"
+  let configFilePath = dir </> "authorInfo.yaml"
   exists <- doesFileExist configFilePath
   if exists
     then do
@@ -78,8 +117,23 @@ data ProjectInfo = ProjectInfo
   { projectName :: String
   , apps :: [App]
   , tastyTestTypes :: S.Set TestType
-  } deriving (Show)
+  } deriving (Eq, Show)
 
+instance FromJSON ProjectInfo where
+  parseJSON =
+    withObject "ProjectInfo" $ \o ->
+      ProjectInfo <$> o .: "projectName" <*> o .: "apps" <*>
+      o .: "tastyTestTypes"
+
+instance ToJSON ProjectInfo where
+  toJSON ProjectInfo {..} =
+    object
+      [ "projectName" .= projectName
+      , "apps" .= apps
+      , "tastyTestTypes" .= tastyTestTypes
+      ]
+
+------------------------------------------------------------
 data Config = Config
   { thisYear :: String
   , authorInfo :: AuthorInfo
