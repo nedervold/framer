@@ -1,7 +1,7 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Framer.ReadMe where
+module Framer.Templates.ReadMe where
 
 import Data.ByteString (ByteString)
 import Data.ByteString.UTF8 (fromString)

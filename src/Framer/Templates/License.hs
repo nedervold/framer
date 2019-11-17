@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE QuasiQuotes #-}
 
-module Framer.License where
+module Framer.Templates.License where
 
 import Data.ByteString (ByteString)
 import Data.ByteString.UTF8 (fromString)

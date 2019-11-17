@@ -1,20 +1,21 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE QuasiQuotes #-}
 
-module Framer.Main where
+module Framer.Templates.GitIgnore where
 
 import Data.ByteString (ByteString)
 import Data.ByteString.UTF8 (fromString)
 import Data.String.Interpolate (i)
 import Framer.Config
 
-mainText :: Config -> ByteString
-mainText Config {..} =
+gitIgnoreText :: Config -> ByteString
+gitIgnoreText Config {..} =
   fromString
-    [i|module Main where
+    [i|# stack cruft
+.stack-work/
+#{projectName}.cabal
 
-import Lib
-
-main :: IO ()
-main = someFunc
+# emacs cruft
+*~
+\#*
 |]

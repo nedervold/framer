@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE QuasiQuotes #-}
 
-module Framer.ChangeLog where
+module Framer.Templates.ChangeLog where
 
 import Data.ByteString (ByteString)
 import Data.ByteString.UTF8 (fromString)

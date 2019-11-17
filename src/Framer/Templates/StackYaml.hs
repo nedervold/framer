@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE QuasiQuotes #-}
 
-module Framer.StackYaml where
+module Framer.Templates.StackYaml where
 
 import Data.ByteString (ByteString)
 import Data.ByteString.UTF8 (fromString)

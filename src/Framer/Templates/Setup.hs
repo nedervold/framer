@@ -1,21 +1,16 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE QuasiQuotes #-}
 
-module Framer.GitIgnore where
+module Framer.Templates.Setup where
 
 import Data.ByteString (ByteString)
 import Data.ByteString.UTF8 (fromString)
 import Data.String.Interpolate (i)
 import Framer.Config
 
-gitIgnoreText :: Config -> ByteString
-gitIgnoreText Config {..} =
+setupText :: Config -> ByteString
+setupText Config {..} =
   fromString
-    [i|# stack cruft
-.stack-work/
-#{projectName}.cabal
-
-# emacs cruft
-*~
-\#*
+    [i|import Distribution.Simple
+main = defaultMain
 |]

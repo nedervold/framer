@@ -1,7 +1,7 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Framer.Makefile where
+module Framer.Templates.Makefile where
 
 import Data.ByteString (ByteString)
 import Data.ByteString.UTF8 (fromString)

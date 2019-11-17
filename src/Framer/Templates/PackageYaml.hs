@@ -3,7 +3,7 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TupleSections #-}
 
-module Framer.PackageYaml where
+module Framer.Templates.PackageYaml where
 
 import Data.ByteString (ByteString)
 import qualified Data.HashMap.Strict as HM
