@@ -8,14 +8,21 @@ import qualified Data.Set as S
 import Data.String (IsString(..))
 import Data.Text (Text)
 import Data.Time.Calendar (toGregorian)
-import Data.Time.LocalTime
-       (LocalTime(..), ZonedTime(..), getZonedTime)
+import Data.Time.LocalTime (LocalTime(..), ZonedTime(..), getZonedTime)
 import Data.Yaml
-       (FromJSON(..), Parser, ToJSON(..), Value(..), (.=), (.:),
-        decodeFileEither, object, prettyPrintParseException, withObject,
-        withText)
-import System.Directory
-       (XdgDirectory(..), doesFileExist, getXdgDirectory)
+  ( FromJSON(..)
+  , Parser
+  , ToJSON(..)
+  , Value(..)
+  , (.:)
+  , (.=)
+  , decodeFileEither
+  , object
+  , prettyPrintParseException
+  , withObject
+  , withText
+  )
+import System.Directory (XdgDirectory(..), doesFileExist, getXdgDirectory)
 import System.FilePath ((</>))
 import Text.Printf (printf)
 
@@ -94,10 +101,10 @@ instance ToJSON AuthorInfo where
 defaultAuthorInfo :: AuthorInfo
 defaultAuthorInfo =
   AuthorInfo
-  { authorName = "Joe Author"
-  , githubName = "jauthor"
-  , authorEmail = "jauthor@example.com"
-  }
+    { authorName = "Joe Author"
+    , githubName = "jauthor"
+    , authorEmail = "jauthor@example.com"
+    }
 
 getAuthorInfo :: IO AuthorInfo
 getAuthorInfo = do
@@ -160,13 +167,15 @@ getConfig = do
   ai <- getAuthorInfo
   return
     Config
-    { thisYear = y
-    , authorInfo = ai
-    , projectInfo =
-        ProjectInfo
-        { projectName = "sample"
-        , apps =
-            [App "sample-exe" "Sample" True, App "namuna" "Namuna" False]
-        , tastyTestTypes = S.singleton Hedgehog
-        }
-    }
+      { thisYear = y
+      , authorInfo = ai
+      , projectInfo =
+          ProjectInfo
+            { projectName = "sample"
+            , apps =
+                [ App "sample-exe" "Sample" True
+                , App "namuna" "Namuna" False
+                ]
+            , tastyTestTypes = S.singleton Hedgehog
+            }
+      }

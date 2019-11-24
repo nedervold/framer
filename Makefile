@@ -1,4 +1,4 @@
-.PHONY : clean hindent run
+.PHONY : clean hindent run test
 
 HINDENT = hindent --line-length 76 --sort-imports
 

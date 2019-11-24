@@ -8,12 +8,14 @@ module Framer.App
 
 import Control.Monad.Identity
 import Data.ByteString (ByteString)
+import Data.FSEntries.Forest (drawFSEntries)
 import Data.FSEntries.IO (writeFSEntriesToFS)
 import Data.FSEntries.Types
-import Data.FSEntries.Zip (zipFSEntriesWithA)
-import Data.List (foldl')
+import Data.FSEntries.Zip (interleave)
+import Data.List (intersperse)
 import Data.String (IsString(..))
 import Data.String.Interpolate (i)
+import Data.Validation (Validation(..))
 import Framer.Config
 import Framer.Templates.ChangeLog (changeLogText)
 import Framer.Templates.GitIgnore (gitIgnoreText)
@@ -24,8 +26,7 @@ import Framer.Templates.ReadMe (readMeText)
 import Framer.Templates.Setup (setupText)
 import Framer.Templates.Spec (specText)
 import Framer.Templates.StackYaml (stackYamlText)
-import System.Directory
-       (createDirectory, doesDirectoryExist, makeAbsolute)
+import System.Directory (createDirectory, doesDirectoryExist, makeAbsolute)
 import System.Environment (getArgs)
 
 main :: IO ()
@@ -55,26 +56,16 @@ main = do
     concatEntries [projectEntries, appEntries, testEntries]
 
 concatEntries :: [FSEntries () ByteString] -> FSEntries () ByteString
-concatEntries = foldl' appendEntries (mkFSEntries [])
+concatEntries fss =
+  case interleave fss of
+    Failure _ -> error errStr
+    Success fs -> fs
   where
-    appendEntries
-      :: FSEntries () ByteString
-      -> FSEntries () ByteString
-      -> FSEntries () ByteString
-    appendEntries lhs rhs = runIdentity $ zipFSEntriesWithA merge lhs rhs
-        -- | Given matching entries, the right one prevails.
-      where
-        merge
-          :: Maybe (FSEntry () ByteString)
-          -> Maybe (FSEntry () ByteString)
-          -> Identity (Maybe (FSEntry () ByteString))
-        merge Nothing mRhs = pure mRhs
-        merge mLhs Nothing = pure mLhs
-        merge (Just (Dir () entries)) (Just (Dir () entries')) =
-          pure . Dir () <$> zipFSEntriesWithA merge entries entries'
-        merge (Just (File _)) f@(Just (File _)) = pure f
-        merge (Just (Dir _ _)) (Just (File _)) = error "dir/file conflict"
-        merge (Just (File _)) (Just (Dir _ _)) = error "file/dir conflict"
+    errStr = unlines ("concatEntries: could not interleave" : trees)
+    toTree :: FSEntries () ByteString -> String
+    toTree = drawFSEntries (const "<dir>") (const "<file>")
+    trees :: [String]
+    trees = intersperse "------------------------------" $ map toTree fss
 
 mkAppEntries :: App -> FSEntries () ByteString
 mkAppEntries App {..} =

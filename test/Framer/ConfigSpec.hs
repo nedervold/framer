@@ -11,17 +11,13 @@ import Data.Yaml
 import Framer.Config
 import Test.Tasty.Hspec
 
-sureDecode
-  :: FromJSON s
-  => ByteString -> s
+sureDecode :: FromJSON s => ByteString -> s
 sureDecode yaml =
   case decodeEither' yaml of
     Right v -> v
     Left exc -> error $ prettyPrintParseException exc
 
-roundtripYAML
-  :: (FromJSON s, ToJSON s)
-  => s -> s
+roundtripYAML :: (FromJSON s, ToJSON s) => s -> s
 roundtripYAML = sureDecode . encode
 
 spec_config :: Spec
@@ -88,10 +84,10 @@ githubName: bob
 authorInfoRec :: AuthorInfo
 authorInfoRec =
   AuthorInfo
-  { authorName = "Bob Jones"
-  , authorEmail = "bob@example.com"
-  , githubName = "bob"
-  }
+    { authorName = "Bob Jones"
+    , authorEmail = "bob@example.com"
+    , githubName = "bob"
+    }
 
 ------------------------------------------------------------
 projectInfoYAML :: ByteString
@@ -114,10 +110,12 @@ tastyTestTypes:
 projectInfoRec :: ProjectInfo
 projectInfoRec =
   ProjectInfo
-  { projectName = "election-interference"
-  , apps =
-      [ App {appName = "Fezbook", appModuleName = "Fezbook", isFancy = True}
-      , App {appName = "mutter", appModuleName = "Mutter", isFancy = False}
-      ]
-  , tastyTestTypes = S.fromList [SmallCheck, Hspec]
-  }
+    { projectName = "election-interference"
+    , apps =
+        [ App
+            {appName = "Fezbook", appModuleName = "Fezbook", isFancy = True}
+        , App
+            {appName = "mutter", appModuleName = "Mutter", isFancy = False}
+        ]
+    , tastyTestTypes = S.fromList [SmallCheck, Hspec]
+    }
